@@ -1,0 +1,17 @@
+# Third-party MayaMCP (PatrickPalmer/MayaMCP) is a separate git clone, kept locally for comparison only
+MayaMCP/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.log
+
+# maya_dev_mcp viewport captures
+captures/
+
+# C++ plugin builds
+plugins/build/
+
+# Local backups
+*.orig

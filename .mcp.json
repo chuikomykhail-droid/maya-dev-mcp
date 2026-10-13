@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "MayaMCP": {
+      "type": "stdio",
+      "command": "D:\\Claude\\Maya MCP test\\MayaMCP\\.venv\\Scripts\\python.exe",
+      "args": [
+        "D:\\Claude\\Maya MCP test\\MayaMCP\\src\\maya_mcp_server.py"
+      ],
+      "env": {}
+    },
+    "maya-dev": {
+      "type": "stdio",
+      "command": "D:\\Claude\\Maya MCP test\\maya_dev_mcp\\.venv\\Scripts\\python.exe",
+      "args": [
+        "D:\\Claude\\Maya MCP test\\maya_dev_mcp\\server.py"
+      ],
+      "env": {}
+    }
+  }
+}
