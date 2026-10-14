@@ -5,6 +5,17 @@ viewport capture and a plugin load/unload loop for C++ plugin development.
 
 Not affiliated with Autodesk. Tested with Maya 2024 on Windows.
 
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| `maya_dev_mcp/server.py` | the MCP server (stdio) |
+| `maya_dev_mcp/maya_side/maya_dev_bridge.py` | the bridge that runs inside Maya |
+| `maya_startup/userSetup.py` | starts the bridge when Maya launches |
+| `tests/e2e_dev_mcp.py` | end-to-end test: MCP client → server → Maya, calls every tool |
+| `plugins/` | sample/test C++ plugins used to exercise the plugin loop ([plugins/README.md](plugins/README.md)) |
+| `.mcp.json` | registers the server for Claude Code (project scope) |
+
 ## Tools
 
 | Tool | What it does |
@@ -20,7 +31,7 @@ Not affiliated with Autodesk. Tested with Maya 2024 on Windows.
 ## How it works
 
 ```
-MCP client (Claude Code, ...) --stdio--> server.py --TCP 127.0.0.1:50010--> maya_side/maya_dev_bridge.py (inside Maya)
+MCP client (Claude Code, ...) --stdio--> maya_dev_mcp/server.py --TCP 127.0.0.1:50010--> maya_dev_bridge.py (inside Maya)
 ```
 
 The bridge is a small socket server running in a background thread inside Maya. Messages are
@@ -32,14 +43,16 @@ escaping, no 4 KB buffer limit and no security prompt.
 
 1. Create a virtual environment and install the dependencies (Python 3.10+):
    ```
+   cd maya_dev_mcp
    python -m venv .venv
    .venv\Scripts\python -m pip install -r requirements.txt
    ```
-2. Start the bridge in Maya, e.g. from `userSetup.py`:
+2. Start the bridge in Maya, e.g. from `userSetup.py` (see `maya_startup/userSetup.py`, put its folder
+   on Maya's `PYTHONPATH`):
    ```python
    import sys
    import maya.utils
-   sys.path.append(r"<path to>\maya_dev_mcp\maya_side")
+   sys.path.append(r"<repo>\maya_dev_mcp\maya_side")
 
    def _start_maya_dev_bridge():
        import maya_dev_bridge
@@ -47,13 +60,22 @@ escaping, no 4 KB buffer limit and no security prompt.
 
    maya.utils.executeDeferred(_start_maya_dev_bridge)
    ```
+   A system-wide `PYTHONPATH` environment variable takes precedence over the one in `Maya.env`. If
+   `userSetup.py` does not run, start the bridge by hand from the Script Editor with the same lines.
 3. Register the server with your MCP client, e.g. Claude Code:
    ```
-   claude mcp add --scope project maya-dev -- "<path>\.venv\Scripts\python.exe" "<path>\server.py"
+   claude mcp add --scope project maya-dev -- "<repo>\maya_dev_mcp\.venv\Scripts\python.exe" "<repo>\maya_dev_mcp\server.py"
    ```
 
 Environment variables: `MAYA_DEV_MCP_PORT` (default `50010`, used by both sides) and
 `MAYA_DEV_MCP_CAPTURE_DIR` (default `./captures`, the last 40 contact sheets are kept).
+
+## C++ plugin loop
+
+`unload_plugin` → build the `.mll` → `load_plugin` → exercise it with `execute_python` → check
+`maya_log`. Windows keeps a loaded `.mll` locked, so always unload before rebuilding. `plugins/`
+contains a CMake/VS Code setup and a sample deformer that runs this loop. See
+[plugins/README.md](plugins/README.md).
 
 ## Security
 
@@ -65,4 +87,7 @@ Maya `commandPort`. Only connect MCP clients you trust.
 
 - `viewport_capture` supports Y-up scenes only; Viewport 2.0 playblasts do not draw the grid.
 - Long-running code blocks Maya's UI for its duration (default timeout 120 s).
+- A modal dialog in Maya blocks every call until it is answered. For example, Maya 2024's
+  "Untrusted Plugin Loading" warning appears for a plugin outside the trusted locations, so add your
+  build folder to Preferences → Security first.
 - C++ `std::cout` goes to Maya's Output Window, not to `maya_log`; use `MGlobal::displayInfo`.

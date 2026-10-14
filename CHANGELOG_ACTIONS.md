@@ -91,6 +91,18 @@
 Пользователь добавил в доверенные пути Maya (optionVar `SafeModeAllowedlistPaths`, вне проекта) папку `D:/Claude/Maya MCP test/plugins/build/relwithdebinfo/plug-ins`. Откат: Preferences → Security → удалить путь.
 Исправлен `waveDeformer`: короткое имя `wl` конфликтовало с `weightList`, заменено на `wvl`. Цикл unload → build → load → тест пройден дважды. Объекты `test_*` удалены, плагин выгружен, сцена пользователя (`pSphere1`) не тронута. Побочный эффект `unload_plugin`: очищена история undo.
 
+## 2026-10-14 — репозиторий только про maya-dev-mcp, удалён сторонний MayaMCP
+| Что | Изменение | Как откатить |
+|---|---|---|
+| `MayaMCP\` (клон PatrickPalmer/MayaMCP + `.venv` ~75 МБ + лог) | **удалён** по просьбе пользователя; перед этим остановлены его процессы MCP-сервера (PID 11112, 19820) | `git clone https://github.com/PatrickPalmer/MayaMCP`, venv заново, в `requirements.txt` `mcp<2` |
+| `.mcp.json` | убран сервер `MayaMCP`, остался `maya-dev` | вернуть блок из git-истории (`69b91da`) |
+| `maya_startup\userSetup.py` | убран MEL commandPort `localhost:50007` (нужен был только MayaMCP), остался запуск моста | из git-истории |
+| `tests\e2e_mcp_test.py` | удалён (тест MayaMCP) | из git-истории |
+| `maya_dev_mcp\README.md` → `README.md` | README сервера перенесён в корень репозитория, добавлены структура репо и раздел про `plugins\` (тестовые плагины) | `git mv` обратно |
+| `.gitignore` | убрана строка `MayaMCP/` | — |
+
+`VSCODE_AGENT_PROMPT.md` не менялся (исторический промпт, в нём ещё упоминается MayaMCP).
+
 ### Полная очистка
 1. Удалить строку `PYTHONPATH=...` из `Maya.env`.
 2. Удалить папку `D:\Claude\Maya MCP test\`.
