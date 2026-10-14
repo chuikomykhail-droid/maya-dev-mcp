@@ -1,0 +1,42 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Pick maya.exe in the process list (type "maya"). Works with both presets:
+            // breakpoints bind once the .mll is loaded and its .pdb sits next to it.
+            "name": "Attach to maya.exe",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "symbolOptions": {
+                "searchMicrosoftSymbolServer": false,
+                "moduleFilter": {
+                    "mode": "loadOnlyIncluded",
+                    "includedModules": ["*.mll"],
+                    "includeSymbolsNextToModules": true
+                }
+            }
+        },
+        {
+            // Builds the debug preset, then starts a new Maya under the debugger.
+            // Close the running Maya first (the MCP bridge port 50010 is per process), then load
+            // plugins/build/debug/plug-ins/<name>.mll via MCP load_plugin.
+            "name": "Launch Maya under debugger (debug build)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "D:/Soft/Autodesk/Maya2024/bin/maya.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "preLaunchTask": "plugins: build (debug)",
+            "symbolOptions": {
+                "searchMicrosoftSymbolServer": false,
+                "moduleFilter": {
+                    "mode": "loadOnlyIncluded",
+                    "includedModules": ["*.mll"],
+                    "includeSymbolsNextToModules": true
+                }
+            }
+        }
+    ]
+}

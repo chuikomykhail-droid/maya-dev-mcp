@@ -64,6 +64,33 @@
 
 Вне проекта: первый коммит запушен в ветку `main` на GitHub (откат — удалить ветку/репозиторий на GitHub). Глобальный git-конфиг не менялся.
 
+## 2026-10-13 — C++ плагины в VS Code (`plugins\`)
+
+### Создано внутри проекта
+| Путь | Что это | Как откатить |
+|---|---|---|
+| `plugins\CMakeLists.txt`, `plugins\CMakePresets.json` | общий проект, presets `debug` / `relwithdebinfo` (MSVC + Ninja, `build\<preset>`) | удалить |
+| `plugins\cmake\FindMaya.cmake` | **копия** `D:\Soft\Autodesk\OpenMayaProjects\FirstPlugin\cmake\FindMaya.cmake` (оригинал не тронут) | удалить |
+| `plugins\cmake\MayaPlugin.cmake` | `maya_add_plugin()` — devkit, флаги, `.mll`, проверка блокировки | удалить |
+| `plugins\cmake\CheckUnlocked.cmake` | PRE_LINK: понятная ошибка, если `.mll`/`.pdb` заняты | удалить |
+| `plugins\cmake\msvc-env.json` | **генерируется** `tools\gen-msvc-env.ps1` из `vcvars64.bat`; не в git | удалить (пересоздаётся `tools\build.cmd`) |
+| `plugins\tools\build.cmd`, `plugins\tools\gen-msvc-env.ps1` | сборка одной командой, генерация окружения MSVC | удалить |
+| `plugins\waveDeformer\` | тестовый деформер (синусоида по X → смещение Y) + `tests\test_waveDeformer.py` | удалить |
+| `plugins\README.md` | документация | удалить |
+| `plugins\build\` | артефакты сборки (`.mll`, `.pdb`, `.obj`), ~10 МБ; не в git | удалить папку |
+| `.vscode\settings.json`, `c_cpp_properties.json`, `tasks.json`, `launch.json`, `extensions.json` | настройки VS Code **только для этой папки** (workspace) | удалить `.vscode\` |
+| `.gitattributes` | CRLF для `*.cmd`/`*.bat` | удалить |
+| `.gitignore` | + `plugins/cmake/msvc-env.json` | убрать строку |
+
+Вне проекта ничего не менялось: глобальные настройки VS Code (включая `C_Cpp.default.compilerPath` = gcc и MinGW-kit CMake Tools) не тронуты — workspace-настройки их перекрывают. Расширения не ставились (CMake Tools, C/C++, Python уже были установлены).
+
+### Сцена Maya
+`load_plugin` для `waveDeformer.mll` из `plugins\build\` вызвал модальный диалог Maya «Untrusted Plugin Loading - Security Warning» (плагин вне доверенных путей) — до ответа на него Maya и MCP-мост ждут. В 23:29 Windows зафиксировал зависание (AppHangB1) и закрыл maya.exe; несохранённая тестовая сцена (`box`, `ball` от прошлых тестов) потеряна. Код плагина при этом не выполнялся.
+
+2026-10-14: пользователь перезапустил Maya. Мост `userSetup.py` не стартовал сам: машинная переменная `PYTHONPATH=D:\Sumo\SUMO\tools\` имеет приоритет над `Maya.env`, и `maya_startup` в путь не попадает. Мост запущен вручную из Script Editor. **Не исправлено**, нужно решение пользователя (см. отчёт).
+Пользователь добавил в доверенные пути Maya (optionVar `SafeModeAllowedlistPaths`, вне проекта) папку `D:/Claude/Maya MCP test/plugins/build/relwithdebinfo/plug-ins`. Откат: Preferences → Security → удалить путь.
+Исправлен `waveDeformer`: короткое имя `wl` конфликтовало с `weightList`, заменено на `wvl`. Цикл unload → build → load → тест пройден дважды. Объекты `test_*` удалены, плагин выгружен, сцена пользователя (`pSphere1`) не тронута. Побочный эффект `unload_plugin`: очищена история undo.
+
 ### Полная очистка
 1. Удалить строку `PYTHONPATH=...` из `Maya.env`.
 2. Удалить папку `D:\Claude\Maya MCP test\`.

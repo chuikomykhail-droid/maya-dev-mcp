@@ -1,0 +1,55 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "include": [ "cmake/msvc-env.json" ],
+  "configurePresets": [
+    {
+      "name": "msvc-ninja",
+      "hidden": true,
+      "inherits": [ "msvc-env" ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_MAKE_PROGRAM": "D:/Soft/Visual Studio/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "MAYA_LOCATION": "D:/Soft/Autodesk/MayaDevKit/devkitBase",
+        "EIGEN_DIR": "D:/Soft/Autodesk/CppMods/eigen"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug (MSVC x64, Ninja)",
+      "description": "/Od + full PDB, release CRT (/MD) to match Maya",
+      "inherits": [ "msvc-ninja" ],
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "relwithdebinfo",
+      "displayName": "RelWithDebInfo (MSVC x64, Ninja)",
+      "description": "Optimized build with PDB",
+      "inherits": [ "msvc-ninja" ],
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "debug", "displayName": "Debug", "configurePreset": "debug" },
+    { "name": "relwithdebinfo", "displayName": "RelWithDebInfo", "configurePreset": "relwithdebinfo" }
+  ],
+  "workflowPresets": [
+    {
+      "name": "debug",
+      "steps": [
+        { "type": "configure", "name": "debug" },
+        { "type": "build", "name": "debug" }
+      ]
+    },
+    {
+      "name": "relwithdebinfo",
+      "steps": [
+        { "type": "configure", "name": "relwithdebinfo" },
+        { "type": "build", "name": "relwithdebinfo" }
+      ]
+    }
+  ]
+}

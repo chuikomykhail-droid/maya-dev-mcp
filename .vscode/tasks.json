@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "preset",
+            "type": "pickString",
+            "description": "CMake preset",
+            "options": ["relwithdebinfo", "debug"],
+            "default": "relwithdebinfo"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "plugins: build (relwithdebinfo)",
+            "detail": "Configure + build all plugins. Unload the plugin in Maya first (MCP unload_plugin).",
+            "type": "shell",
+            "command": ".\\tools\\build.cmd",
+            "args": ["relwithdebinfo"],
+            "options": { "cwd": "${workspaceFolder}/plugins" },
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": { "base": "$msCompile", "fileLocation": ["autoDetect", "${workspaceFolder}/plugins/build/relwithdebinfo"] }
+        },
+        {
+            "label": "plugins: build (debug)",
+            "detail": "Configure + build with /Od and full PDB (used by the 'Launch Maya' debug config).",
+            "type": "shell",
+            "command": ".\\tools\\build.cmd",
+            "args": ["debug"],
+            "options": { "cwd": "${workspaceFolder}/plugins" },
+            "group": "build",
+            "problemMatcher": { "base": "$msCompile", "fileLocation": ["autoDetect", "${workspaceFolder}/plugins/build/debug"] }
+        },
+        {
+            "label": "plugins: configure",
+            "type": "shell",
+            "command": ".\\tools\\build.cmd",
+            "args": ["${input:preset}", "configure"],
+            "options": { "cwd": "${workspaceFolder}/plugins" },
+            "problemMatcher": []
+        },
+        {
+            "label": "plugins: clean",
+            "type": "shell",
+            "command": ".\\tools\\build.cmd",
+            "args": ["${input:preset}", "clean"],
+            "options": { "cwd": "${workspaceFolder}/plugins" },
+            "problemMatcher": []
+        },
+        {
+            "label": "plugins: regenerate MSVC environment",
+            "detail": "Re-run after updating Visual Studio / MSVC / Windows SDK.",
+            "type": "shell",
+            "command": ".\\tools\\build.cmd",
+            "args": ["relwithdebinfo", "env"],
+            "options": { "cwd": "${workspaceFolder}/plugins" },
+            "problemMatcher": []
+        }
+    ]
+}

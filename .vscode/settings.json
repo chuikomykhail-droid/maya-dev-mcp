@@ -1,0 +1,23 @@
+{
+    // C++ plugins: CMake Tools works on plugins/ via CMakePresets.json (kits are not used with presets).
+    "cmake.sourceDirectory": "${workspaceFolder}/plugins",
+    "cmake.useCMakePresets": "always",
+    "cmake.cmakePath": "D:/Soft/Visual Studio/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+    // The MSVC environment comes from plugins/cmake/msvc-env.json (tools/gen-msvc-env.ps1), not from vswhere.
+    "cmake.useVsDeveloperEnvironment": "never",
+    "cmake.configureOnOpen": true,
+
+    // Overrides the user-level MinGW gcc so IntelliSense parses Maya headers as MSVC.
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.compilerPath": "D:/Soft/Visual Studio/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe",
+    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+    "C_Cpp.default.cppStandard": "c++17",
+
+    // maya_dev_mcp (MCP server) runs in its own venv.
+    "python.defaultInterpreterPath": "${workspaceFolder}/maya_dev_mcp/.venv/Scripts/python.exe",
+
+    "search.exclude": {
+        "**/plugins/build": true,
+        "**/.venv": true
+    }
+}
